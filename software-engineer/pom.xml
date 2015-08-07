@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.drmtx</groupId>
-    <artifactId>hiring-exerchise</artifactId>
+    <artifactId>hiring-exercise</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <parent>
@@ -48,6 +48,15 @@
             <version>1.4.187</version>
             <scope>runtime</scope>
         </dependency>
+		<!-- Added by Balazs Torok -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
