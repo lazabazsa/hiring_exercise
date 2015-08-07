@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 /**
  * Digital River's Hiring Exercise for Software Engineer position.
  *
+ * Frequency entity which holds info about a word and its frequency within an Analyzed Reddit URL.
+ *
  * @author Balazs Torok
  * @since 04.08.2015
  */

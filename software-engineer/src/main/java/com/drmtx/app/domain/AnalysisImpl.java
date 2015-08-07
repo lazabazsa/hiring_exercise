@@ -10,6 +10,9 @@ import java.util.Set;
 /**
  * Digital River's Hiring Exercise for Software Engineer position.
  *
+ * Analysis entity which holds the info about the Reddit URL, the number of comments and
+ * a Set of Frequency entities.
+ *
  * @author Balazs Torok
  * @since 04.08.2015
  */

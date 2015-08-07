@@ -32,12 +32,22 @@ public class FrequencyAnalyzerErrorController implements ErrorController {
 		return "/error";
 	}
 
+	/**
+	 * The method for handling the error responses.
+	 * @param request the request which caused the exception
+	 * @return key value pairs as JSON object
+	 */
 	@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public Map<String, Object> error(HttpServletRequest request) {
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		return errorAttributes().getErrorAttributes(requestAttributes, false);
 	}
 
+	/**
+	 * Handles the exceptions to have proper information inside the ErrorAttributes object.
+	 * @return ErrorAttributes which contains the default information coming from DefaultErrorAttributes, and the
+	 * custom info which comes from the internally used FrequencyAnalysisException
+	 */
 	@Bean
 	protected ErrorAttributes errorAttributes() {
 		return new DefaultErrorAttributes() {

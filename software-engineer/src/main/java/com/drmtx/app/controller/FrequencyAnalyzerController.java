@@ -101,6 +101,7 @@ public class FrequencyAnalyzerController {
 	 *
 	 * @param urlParam The reddit url
 	 * @return a unique identifier of the analysis
+	 * @throws FrequencyAnalysisException in case of any validation fails
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/new", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -144,6 +145,20 @@ public class FrequencyAnalyzerController {
 		return analysis.getId();
 	}
 
+
+	/**
+	 * <p>This API endpoint which takes an Analysis UID as a path variable and a count (optional) parameter
+	 * <ul>
+	 * <li>1. Validates the passed Analysis UID.</li>
+	 * <li>2. Validates the passed count value.</li>
+	 * <li>3. Loads all the frequency entities for the given Analysis UID.</li>
+	 * <li>4. Returns the result wrapped in a transfer object</li>
+	 *
+	 * @param id    the Analysis UID
+	 * @param count (optional) is the limit for the result set
+	 * @return the list of FrequencyJSONObject
+	 * @throws FrequencyAnalysisException in case of any validation fails
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<FrequencyJSONObject> retrieveAnalysis(@PathVariable(value = "id") String id, @RequestParam(value = "count", required = false) Integer count) throws FrequencyAnalysisException {
@@ -157,7 +172,7 @@ public class FrequencyAnalyzerController {
 		}
 
 		// Validate count
-		if(count != null && (count < 1 || count > Integer.MAX_VALUE)) {
+		if (count != null && (count < 1 || count > Integer.MAX_VALUE)) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, COUNT_CANNOT_BE_LESS_THAN_ONE);
 		}
 
@@ -176,6 +191,7 @@ public class FrequencyAnalyzerController {
 
 	/**
 	 * Validates whether the url is a valid Reddit Comment URL or not.
+	 *
 	 * @param urlParam a url which should be a valid Reddit Comment URL
 	 * @throws FrequencyAnalysisException if the URL is not valid
 	 */

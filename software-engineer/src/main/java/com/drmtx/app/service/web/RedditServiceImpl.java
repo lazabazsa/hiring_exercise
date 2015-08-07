@@ -19,6 +19,8 @@ import java.util.List;
 /**
  * Digital River's Hiring Exercise for Software Engineer position.
  *
+ * This service is responsible to make HTTP Call of the passed Reddit URL.
+ *
  * @author Balazs Torok
  * @since 05.08.2015
  */

@@ -9,6 +9,9 @@ import java.util.*;
 /**
  * Digital River's Hiring Exercise for Software Engineer position.
  *
+ * Analysis List of RedditCommentJSONObjects and returns its WordAnalysis which contains the list of comments
+ * and a Map of Word / Count key-value pair.
+ *
  * @author Balazs Torok
  * @since 05.08.2015
  */
@@ -53,9 +56,6 @@ public class AnalyzerUtil {
 		Map<String, Long> result = new HashMap<>();
 
 		analysis.getComments().stream().filter(StringUtils::hasText).forEach(comment -> {
-//			String input = "The quick  !fuck!  \n brown fox \t jumps,     over     the lazy dog.\n";
-//			String alpha = input.replaceAll("[!,\\.\\?]", "");
-//			System.out.println(alpha);
 
 			// Trim the comment, clean it from the punctuation characters and lowercase it
 			comment = comment.replaceAll("[!,\\.\\?]", " ").trim().toLowerCase();
@@ -76,6 +76,9 @@ public class AnalyzerUtil {
 	}
 
 
+	/**
+	 * The result of the Analyzer.
+	 */
 	public static class WordAnalysis {
 
 		private List<String> comments = new ArrayList<>();
