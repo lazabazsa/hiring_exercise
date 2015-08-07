@@ -26,31 +26,37 @@ public abstract class AbstractServiceImpl<E extends Entity, ID extends Serializa
 
 	@Override
 	public E save(E entity) {
+		_logger.debug("Saving entity: " + entity.getClass().getSimpleName());
 		return getRepository().save(entity);
 	}
 
 	@Override
 	public <F extends ID> E findOne(F id) {
+		_logger.debug("Finding an entity for id: " + id);
 		return getRepository().findOne(id);
 	}
 
 	@Override
 	public List<E> findAll() {
+		_logger.debug("Finding all the entities.");
 		return getRepository().findAll();
 	}
 
 	@Override
 	public void delete(E entity) {
+		_logger.debug("Deleting entity: " + entity.getClass().getSimpleName());
 		getRepository().delete(entity);
 	}
 
 	@Override
 	public void deleteAllInBatch() {
+		_logger.debug("Deleting entities in a Batch Call");
 		getRepository().deleteAllInBatch();
 	}
 
 	@Override
 	public long count() {
+		_logger.debug("Retrieving count()");
 		return getRepository().count();
 	}
 }

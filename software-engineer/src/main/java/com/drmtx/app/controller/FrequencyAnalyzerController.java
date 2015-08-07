@@ -13,7 +13,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -24,7 +23,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,29 +109,38 @@ public class FrequencyAnalyzerController {
 	@RequestMapping(value = "/new", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String newAnalysis(@RequestParam(value = "url") String urlParam) throws FrequencyAnalysisException {
 
+		_logger.info("New Analysis Request start.");
+
 		// Make urlParam lowercase
 		urlParam = urlParam.toLowerCase();
 
 		// Validate urlParam
 		validateURL(urlParam);
+		_logger.info("URL is fully valid.");
 
 		// Make a HTTP request using the urlParam to retrieve the json of the comments.
 		List<RedditService.RedditCommentJSONObject> jsonObjects = redditService.retrieveComments(urlParam);
+		_logger.info("RedditCommentJSONObject(s) are retrieved.");
+
 
 		// Analyze the response of the Reddit URL.
 		AnalyzerUtil.WordAnalysis wordAnalysis = AnalyzerUtil.analyze(jsonObjects);
+		_logger.info("Analysis is ready.");
 
 		// wordAnalysis must not be null.
 		Assert.notNull(wordAnalysis);
 
 		// Persist the analysis and the results if there are any
 		Map<String, Long> wordFrequency = wordAnalysis.getWordFrequency();
+		_logger.info("Save an Analysis entity.");
 		Analysis analysis = new AnalysisImpl();
 		analysis.setNumberOfComments((long) wordAnalysis.getComments().size());
 		analysis.setRedditURL(urlParam);
 		analysisService.save(analysis);
+		_logger.info("Analysis entity is saved.");
 
 		if (!wordFrequency.isEmpty()) {
+			_logger.info("Save all the Frequency entities.");
 			for (String word : wordFrequency.keySet()) {
 				Frequency frequency = new FrequencyImpl();
 				analysis.addFrequency(frequency);
@@ -137,11 +148,13 @@ public class FrequencyAnalyzerController {
 				frequency.setCount(wordFrequency.get(word));
 				frequencyService.save(frequency);
 			}
+			_logger.info("All the Frequency entities are saved.");
 		}
 
 		// analysis' id must not be null.
 		Assert.notNull(analysis.getId());
 		// return the UID of the analysis
+		_logger.info("Returning the Analysis UID.");
 		return analysis.getId();
 	}
 
@@ -170,21 +183,25 @@ public class FrequencyAnalyzerController {
 		if (analysis == null) {
 			throw new FrequencyAnalysisException(HttpStatus.NOT_FOUND, String.format(ANALYSIS_CANNOT_BE_FOUND, id));
 		}
+		_logger.info("Analysis UID is valid.");
 
 		// Validate count
 		if (count != null && (count < 1 || count > Integer.MAX_VALUE)) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, COUNT_CANNOT_BE_LESS_THAN_ONE);
 		}
+		_logger.info("Count is either null or valid.");
 
 		List<FrequencyJSONObject> result = new ArrayList<>();
 		// Create the result array of FrequencyJSONObject if there are any frequencies
 		List<Frequency> frequencies = frequencyService.findByAnalysisId(id, count);
+		_logger.info("Frequency entities are loaded.");
 		if (!CollectionUtils.isEmpty(frequencies)) {
 			frequencies.forEach(frequency -> {
 				result.add(new FrequencyJSONObject(frequency.getWord(), frequency.getCount()));
 			});
 		}
 
+		_logger.info("Result JSON Object is ready, returning.");
 		return result;
 	}
 
@@ -196,10 +213,9 @@ public class FrequencyAnalyzerController {
 	 * @throws FrequencyAnalysisException if the URL is not valid
 	 */
 	private void validateURL(String urlParam) throws FrequencyAnalysisException {
+		_logger.info("URL validation starts.");
 		// The URL parameter must be always provided, therefore we check it.
 		if (!StringUtils.hasText(urlParam)) {
-			Locale locale = LocaleContextHolder.getLocale();
-
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, NOT_PROVIDED_URL);
 		}
 
@@ -210,6 +226,7 @@ public class FrequencyAnalyzerController {
 		} catch (MalformedURLException e) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, String.format(NOT_VALID_URL, urlParam) + URL_ERROR_REASON + e.getMessage());
 		}
+		_logger.info("URL is a valid URL.");
 
 		// URL object must not be null.
 		Assert.notNull(url);
@@ -218,6 +235,8 @@ public class FrequencyAnalyzerController {
 		if (!url.getProtocol().contains(HTTP_PROTOCOL) || !url.getHost().contains(HOST_REDDIT)) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, String.format(NOT_VALID_REDDIT_URL, urlParam));
 		}
+		_logger.info("URL is a valid Reddit URL.");
+
 
 		// Check if the urlPath contains the comments and the article id.
 		// Comments part
@@ -237,11 +256,13 @@ public class FrequencyAnalyzerController {
 		if (!containsCommentsPath) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, String.format(REDDIT_URL_DOES_NOT_HAVE_COMMENTS_PART, urlParam));
 		}
+		_logger.info("URL has a valid 'comments' part.");
 
 		// .JSON part
 		if (!urlPath.endsWith(DOT_JSON)) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, String.format(REDDIT_URL_DOES_NOT_HAVE_DOT_JSON_PART, urlParam));
 		}
+		_logger.info("URL has a valid '.json' part.");
 
 		// Article ID36 part
 		int articlePathIndex = urlPathElements.indexOf(COMMENTS) + 1;
@@ -258,6 +279,7 @@ public class FrequencyAnalyzerController {
 		if (!matches) {
 			throw new FrequencyAnalysisException(HttpStatus.BAD_REQUEST, String.format(REDDIT_URL_HAS_INVALID_ARTICLE_PART, urlParam));
 		}
+		_logger.info("URL has a valid 'articleID36' part.");
 	}
 
 	/**

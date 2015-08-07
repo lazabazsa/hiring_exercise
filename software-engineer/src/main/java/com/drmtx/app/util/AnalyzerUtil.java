@@ -1,6 +1,8 @@
 package com.drmtx.app.util;
 
 import com.drmtx.app.service.web.RedditService;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -17,14 +19,20 @@ import java.util.*;
  */
 public class AnalyzerUtil {
 
+	private static final Logger _logger = LogManager.getLogger(AnalyzerUtil.class);
+
 	public static synchronized WordAnalysis analyze(List<RedditService.RedditCommentJSONObject> jsonObjects) {
+		_logger.info("Start analysing the comments.");
 		WordAnalysis analysis = new WordAnalysis();
 
 		for (RedditService.RedditCommentJSONObject jsonObject : jsonObjects) {
 
 			collectComments(jsonObject, analysis);
+			_logger.info("Comments are collected for a JSON Obejct.");
+
 			analyzeComments(analysis);
 		}
+		_logger.info("Returning Analysis result.");
 		return analysis;
 	}
 
@@ -72,6 +80,7 @@ public class AnalyzerUtil {
 			}
 
 		});
+		_logger.info("Analysis is ready for a JSON object.");
 		analysis.setWordFrequency(result);
 	}
 
